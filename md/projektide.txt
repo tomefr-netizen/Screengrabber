@@ -1,0 +1,43 @@
+(startade 2026-04-20 kl 12:55)
+Startknappar CTRL+Shift+4
+
+Projekt ide.
+En "enkel app" som körs på en Mac med M processor.
+Appen används för att ta skärmbilder och för att rita på bilden. Appen sparar bilderna i ett bra format för webben.
+
+Appen startas med ett kortkommando, ge förslag - men kanske Commad+S. Vi drar en rektangulär markering runt det vi vi fill fånga. 
+Nu öppnas en enkel editor, där vi kan markera objekt med
+- Överstryknings penna
+- Penna för att dra en linje (håll ner shift för att rita en rak linje)
+- Cirkel (håll ner shift för att göra den helt rund)
+- Rektangel (håll ner shift för att göra alla sidor lika långa)
+Vi ska kunna välja färg på alla verktyg.
+Slutna verktyg ska även kunna fyllas bakgrunds färg på, valfri färg och transparens.
+Vi ska kunna rita figurer, ex pilar, småbollar och vad det nu kan vara. Vi kan skapa ett figurbibliotek där användaren kan lägga till egna figurer.
+Filerna sparas sedan som bildfiler som är lämpliga för webben, jag tänker på webp och avif, men även png.
+
+När programmet startas visas endast en flytande meny. 
+Alternativ (exempel vi kan ha fler)
+- Ny
+- Spara
+- Fördröjning (2, 5 och 10sek)
+När en bild är fångas visas fönstermenyn (eller vad dom nu heter på mac)
+- Ny
+- Spara
+- Fördröjning
+- Penna (klicka ner och välj penntyp, form och färg)
+- Överstrykningspenna (klicka ner och välj penntyp, form och färg)
+- Figurer (klicka ner och välj figurtyp, pilar, rektangel, cirkel)
+- Textfält, med eller utan bakgrund. Välj font, textstorlek, fet, kursiv, understruken. Text och bakgrundsfärg
+Ny.
+- Skapar en ny bild, om vi har en bild fångad men inte sparad, fråga om bilden ska sparas. Radera den sen från fångarfönstret och skapa en ny bild. Är den redan sparad, så töm bara fönstret och skapa en ny bild.
+Spara
+- Normal spara dialog, med val av bildformat. Minst webp, avif och png.
+- Spara som alternativ, så vi kan byta filnamn och plars och typ om vi vill det.
+Fördröjning.
+- 2, 5 och 10 sek. Gör att vi kan starta fångningen och sedan förbreda vad vi behöver på skärmen, ex fälla ut menyer. När bilden sedan ska fångas så fryses hela bilden, så att menyer inte stängs. Frysningen sker till att bilden är fångad sedan släpps den direkt igen.
+- Penne en enkel ritpenna. Om vi vill rita en rak linje, håller vi in shift, det gör att linjen blir spikrak. Vinkeln bestäms av vilket håll musen befinner sig från startpunkten, vi kan rita i 45 graders intervall.
+- Överstryknigspenne, ritar en transparent färg över bakgrunden. Även den här kan låsas som en rak linje med shift, på samma sätt som pennan.
+- Figurer. Jag är mest intresserad av pilar och cirklar. Men ett bibliotek med figurer skadar inte.
+- Textfält, om vi vill lägga till text på bilden.
+
