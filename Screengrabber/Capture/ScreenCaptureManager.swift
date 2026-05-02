@@ -30,8 +30,8 @@ class ScreenCaptureManager {
             }
         }
         overlayWindow = overlay
-        overlay.orderFrontRegardless()
         NSApp.activate(ignoringOtherApps: true)
+        overlay.makeKeyAndOrderFront(nil)
         overlay.makeFirstResponder(overlay.contentView)
     }
 

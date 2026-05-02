@@ -24,6 +24,7 @@ class DrawingState {
     var highlighterOpacity: CGFloat = 0.4
     var bubbleZoomLevel: CGFloat = 2.0
 
+    var canvasSize: CGSize = .zero
     var hasImage: Bool { baseImage != nil }
 
     func addAnnotation(_ a: Annotation) {

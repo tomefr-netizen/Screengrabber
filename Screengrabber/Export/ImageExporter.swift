@@ -19,7 +19,7 @@ enum ExportFormat: Equatable {
 class ImageExporter {
     static func export(state: DrawingState) {
         guard let base = state.baseImage else { return }
-        guard let rendered = render(base: base, annotations: state.annotations) else { return }
+        guard let rendered = render(base: base, annotations: state.annotations, viewSize: state.canvasSize) else { return }
 
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd-HHmmss"
@@ -35,8 +35,12 @@ class ImageExporter {
         }
     }
 
-    private static func render(base: CGImage, annotations: [Annotation]) -> CGImage? {
+    private static func render(base: CGImage, annotations: [Annotation], viewSize: CGSize) -> CGImage? {
         let w = base.width, h = base.height
+        let vw = viewSize.width > 0 ? viewSize.width : CGFloat(w)
+        let vh = viewSize.height > 0 ? viewSize.height : CGFloat(h)
+        let scaleX = CGFloat(w) / vw
+        let scaleY = CGFloat(h) / vh
         guard let cs = base.colorSpace ?? CGColorSpace(name: CGColorSpace.sRGB),
               let ctx = CGContext(
                 data: nil, width: w, height: h,
@@ -45,17 +49,17 @@ class ImageExporter {
                 bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
               ) else { return nil }
 
-        // Draw base image (un-flip for CGContext which is y-up)
-        ctx.saveGState()
-        ctx.translateBy(x: 0, y: CGFloat(h))
-        ctx.scaleBy(x: 1, y: -1)
-        ctx.draw(base, in: CGRect(x: 0, y: 0, width: w, height: h))
-        ctx.restoreGState()
+        // Draw base image via NSImage — handles CGImage↔CGContext coordinate flip correctly
+        let nsBase = NSImage(cgImage: base, size: NSSize(width: CGFloat(w), height: CGFloat(h)))
+        NSGraphicsContext.saveGraphicsState()
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: ctx, flipped: false)
+        nsBase.draw(in: NSRect(x: 0, y: 0, width: CGFloat(w), height: CGFloat(h)))
+        NSGraphicsContext.restoreGraphicsState()
 
-        // Draw annotations (inside flip transform so view coords work correctly)
+        // Draw annotations: flip y + scale from view-point space to image-pixel space
         ctx.saveGState()
         ctx.translateBy(x: 0, y: CGFloat(h))
-        ctx.scaleBy(x: 1, y: -1)
+        ctx.scaleBy(x: scaleX, y: -scaleY)
         let ciCtx = CIContext()
         for annotation in annotations {
             switch annotation {
@@ -118,8 +122,10 @@ class ImageExporter {
                 }
 
             case let .blur(blurRect, kind):
-                let cropRect = CGRect(x: blurRect.minX, y: CGFloat(h) - blurRect.maxY,
-                                     width: blurRect.width, height: blurRect.height)
+                let cropRect = CGRect(x: blurRect.minX * scaleX,
+                                     y: (vh - blurRect.maxY) * scaleY,
+                                     width: blurRect.width * scaleX,
+                                     height: blurRect.height * scaleY)
                 if let cropped = base.cropping(to: cropRect),
                    let result = applyBlurFilter(to: cropped, kind: kind, ciContext: ciCtx) {
                     ctx.draw(result, in: blurRect)
@@ -127,9 +133,9 @@ class ImageExporter {
 
             case let .zoomBubble(center, radius, zoomLevel):
                 let sourceW = (radius * 2) / zoomLevel, sourceH = (radius * 2) / zoomLevel
-                let cropRect = CGRect(x: center.x - sourceW / 2,
-                                     y: CGFloat(h) - (center.y + sourceH / 2),
-                                     width: sourceW, height: sourceH)
+                let cropRect = CGRect(x: (center.x - sourceW / 2) * scaleX,
+                                     y: (vh - center.y - sourceH / 2) * scaleY,
+                                     width: sourceW * scaleX, height: sourceH * scaleY)
                 guard let cropped = base.cropping(to: cropRect) else { break }
                 let bubbleRect = CGRect(x: center.x - radius, y: center.y - radius,
                                         width: radius * 2, height: radius * 2)
