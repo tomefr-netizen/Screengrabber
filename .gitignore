@@ -32,3 +32,6 @@ build/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Local scratch files
+gitignore/
