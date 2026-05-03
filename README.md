@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-Den här koden är framtagen med hjälp av AI-verktyg och bör betraktas som experimentell. Jag gör inga anspråk på att vara utvecklare och kan därför inte garantera att implementationen är säker, komplett eller lämplig för produktion. All användning sker på egen risk. Jag använder själv projektet endast i mitt lokala nätverk och via VPN, inte exponerat mot internet. Om du väljer att använda det annorlunda rekommenderar jag att du gör en egen säkerhetsgranskning innan du öppnar upp något externt.
+Den här koden är framtagen med hjälp av AI‑verktyg och bör betraktas som experimentell. Jag gör inga anspråk på att vara utvecklare och kan därför inte garantera att implementationen är säker, komplett eller lämplig för produktion. All användning sker på egen risk. Jag använder själv projektet endast i mitt lokala nätverk och via VPN, inte exponerat mot internet. Om du väljer att använda det annorlunda rekommenderar jag att du gör en egen säkerhetsgranskning innan du öppnar upp något externt.
 
 Screengrabber är en lättviktig macOS-app för att ta skärmbilder och annotera dem snabbt när du bygger manualer, guider och annan dokumentation.
 
