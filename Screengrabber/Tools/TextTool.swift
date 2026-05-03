@@ -26,9 +26,13 @@ class TextTool: NSObject, DrawingTool, NSTextFieldDelegate {
     }
 
     func mouseDragged(to point: CGPoint, modifierFlags: NSEvent.ModifierFlags) {}
-    func mouseUp(at point: CGPoint) {}
+    func mouseUp(at point: CGPoint, in view: NSView) {}
     func drawInProgress(in context: CGContext) {}
-    func endEditing() { commitIfNeeded() }
+    func endEditing() { finalizeEditing() }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        finalizeEditing()
+    }
 
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.insertNewline(_:)) { commit(); return true }
@@ -38,24 +42,41 @@ class TextTool: NSObject, DrawingTool, NSTextFieldDelegate {
 
     private func commit() {
         guard let f = textField else { return }
+        let superview = f.superview
         let text = f.stringValue
         if !text.isEmpty {
             let font = f.font ?? NSFont.systemFont(ofSize: 18)
             let color = f.textColor ?? (state?.activeColor ?? .red)
-            state?.addAnnotation(.text(text, font, color, f.frame))
+            let annotation = Annotation.text(text, font, color, f.frame)
+            if let canvas = f.superview as? CanvasView {
+                state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+            } else {
+                state?.addAnnotation(annotation)
+            }
         }
         f.removeFromSuperview()
-        f.superview?.needsDisplay = true
+        superview?.needsDisplay = true
         textField = nil
     }
 
     private func cancel() {
+        let superview = textField?.superview
         textField?.removeFromSuperview()
+        superview?.needsDisplay = true
         textField = nil
+    }
+
+    private func finalizeEditing() {
+        guard let textField else { return }
+        if textField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            cancel()
+        } else {
+            commit()
+        }
     }
 
     private func commitIfNeeded() {
         guard textField != nil else { return }
-        commit()
+        finalizeEditing()
     }
 }

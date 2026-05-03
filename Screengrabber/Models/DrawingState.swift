@@ -3,7 +3,29 @@ import AppKit
 import Observation
 
 enum ToolType: String, CaseIterable {
-    case select, pen, highlighterPen, text, stepMarker, arrow, rect, ellipse, highlight, blur, magnifier
+    case select, pen, highlighterPen, text, stepMarker, arrow, rect, ellipse, highlight, blur, magnifier, symbol
+}
+
+enum SymbolKind: String, CaseIterable {
+    case checkmark, cross, info, warning
+
+    var title: String {
+        switch self {
+        case .checkmark: return "Checkmark"
+        case .cross: return "Kryss"
+        case .info: return "Info"
+        case .warning: return "Varning"
+        }
+    }
+
+    var symbolName: String {
+        switch self {
+        case .checkmark: return "checkmark"
+        case .cross: return "xmark"
+        case .info: return "info.circle"
+        case .warning: return "exclamationmark.triangle"
+        }
+    }
 }
 
 enum BlurMode: String, Equatable {
@@ -23,8 +45,8 @@ class DrawingState {
     var blurMode: BlurMode = .gaussian
     var highlighterOpacity: CGFloat = 0.4
     var bubbleZoomLevel: CGFloat = 2.0
-
-    var canvasSize: CGSize = .zero
+    var zoomScale: CGFloat = 1.0
+    var selectedSymbol: SymbolKind = .checkmark
     var hasImage: Bool { baseImage != nil }
 
     func addAnnotation(_ a: Annotation) {
@@ -60,5 +82,6 @@ class DrawingState {
         baseImage = nil
         annotations.removeAll()
         redoStack.removeAll()
+        zoomScale = 1.0
     }
 }

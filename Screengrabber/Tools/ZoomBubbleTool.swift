@@ -17,11 +17,16 @@ class ZoomBubbleTool: DrawingTool {
         currentRadius = hypot(point.x - c.x, point.y - c.y)
     }
 
-    func mouseUp(at point: CGPoint) {
+    func mouseUp(at point: CGPoint, in view: NSView) {
         defer { center = nil; currentRadius = 0 }
         guard let c = center, currentRadius > 20 else { return }
         let zoom = state?.bubbleZoomLevel ?? 2.0
-        state?.addAnnotation(.zoomBubble(c, currentRadius, zoom))
+        let annotation = Annotation.zoomBubble(c, currentRadius, zoom)
+        if let canvas = view as? CanvasView {
+            state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+        } else {
+            state?.addAnnotation(annotation)
+        }
     }
 
     func drawInProgress(in context: CGContext) {

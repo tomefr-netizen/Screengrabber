@@ -25,13 +25,18 @@ class PenTool: DrawingTool {
         }
     }
 
-    func mouseUp(at point: CGPoint) {
+    func mouseUp(at point: CGPoint, in view: NSView) {
         defer { points.removeAll() }
         guard points.count >= 2 else { return }
         let path = CGMutablePath()
         path.move(to: points[0])
         points.dropFirst().forEach { path.addLine(to: $0) }
-        state?.addAnnotation(.path(path, color, width))
+        let annotation = Annotation.path(path, color, width)
+        if let canvas = view as? CanvasView {
+            state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+        } else {
+            state?.addAnnotation(annotation)
+        }
     }
 
     func drawInProgress(in context: CGContext) {

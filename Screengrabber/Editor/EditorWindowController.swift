@@ -4,12 +4,13 @@ import SwiftUI
 class EditorWindowController: NSWindowController {
     private let state: DrawingState
     private(set) var canvasView: CanvasView?
+    private var scrollView: NSScrollView?
 
     init(state: DrawingState) {
         self.state = state
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 800, height: 600),
-            styleMask: [.titled, .closable, .miniaturizable],
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
@@ -28,11 +29,21 @@ class EditorWindowController: NSWindowController {
         canvas.setup(state: state)
         canvasView = canvas
 
+        let scrollView = NSScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.hasVerticalScroller = true
+        scrollView.hasHorizontalScroller = true
+        scrollView.autohidesScrollers = true
+        scrollView.borderType = .noBorder
+        scrollView.backgroundColor = .windowBackgroundColor
+        scrollView.documentView = canvas
+        self.scrollView = scrollView
+
         let toolbar = NSHostingView(rootView: EditorToolbarView(state: state))
         toolbar.translatesAutoresizingMaskIntoConstraints = false
-        canvas.translatesAutoresizingMaskIntoConstraints = false
+        canvas.translatesAutoresizingMaskIntoConstraints = true
 
-        let stack = NSStackView(views: [toolbar, canvas])
+        let stack = NSStackView(views: [toolbar, scrollView])
         stack.orientation = .vertical
         stack.spacing = 0
         stack.distribution = .fill
@@ -51,12 +62,13 @@ class EditorWindowController: NSWindowController {
         let maxH = (screen.visibleFrame.height - 44) * 0.92
         let scale = min(maxW / imageW, maxH / imageH, 1.0)
         let contentSize = NSSize(width: imageW * scale, height: imageH * scale + 44)
+        state.zoomScale = 1.0
         window.setContentSize(contentSize)
         window.center()
         showWindow(nil)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         window.makeFirstResponder(canvasView)
-        state.canvasSize = NSSize(width: imageW * scale, height: imageH * scale)
+        canvasView?.frame = CGRect(origin: .zero, size: NSSize(width: imageW * scale, height: imageH * scale))
     }
 }

@@ -2,6 +2,7 @@ import AppKit
 
 class RegionSelectorView: NSView {
     var onSelection: ((NSRect) -> Void)?
+    var onCancel: (() -> Void)?
 
     private let screenImage: CGImage
     private var startPoint: NSPoint = .zero
@@ -117,11 +118,19 @@ class RegionSelectorView: NSView {
         if selectionRect.width > 10 && selectionRect.height > 10 {
             onSelection?(selectionRect)
         } else {
-            window?.close()
+            cancelCapture()
         }
     }
 
     override func keyDown(with event: NSEvent) {
-        if event.keyCode == 53 { window?.close() } // Escape
+        if event.keyCode == 53 {
+            cancelCapture()
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+
+    private func cancelCapture() {
+        onCancel?()
     }
 }

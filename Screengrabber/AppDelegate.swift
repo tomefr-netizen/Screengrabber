@@ -57,6 +57,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let saveItem = menu.addItem(withTitle: "Spara", action: #selector(handleSave), keyEquivalent: "")
         saveItem.target = self
         saveItem.isEnabled = state.hasImage
+        let copyPNGItem = menu.addItem(withTitle: "Kopiera som PNG", action: #selector(handleCopyPNG), keyEquivalent: "")
+        copyPNGItem.target = self
+        copyPNGItem.isEnabled = state.hasImage
+        let copyAVIFItem = menu.addItem(withTitle: "Kopiera som AVIF", action: #selector(handleCopyAVIF), keyEquivalent: "")
+        copyAVIFItem.target = self
+        copyAVIFItem.isEnabled = state.hasImage
         menu.addItem(.separator())
         menu.addItem(withTitle: "Avsluta", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem?.menu = menu
@@ -120,16 +126,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupNotifications() {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(handleSave),        name: .saveRequested,       object: nil)
+        nc.addObserver(self, selector: #selector(handleCopyPNG),     name: .copyPNGRequested,    object: nil)
+        nc.addObserver(self, selector: #selector(handleCopyAVIF),    name: .copyAVIFRequested,   object: nil)
         nc.addObserver(self, selector: #selector(handleNew),         name: .newImageRequested,   object: nil)
         nc.addObserver(self, selector: #selector(handleDelayChange), name: .captureDelayChanged, object: nil)
     }
 
     @objc private func handleSave() {
+        saveCurrentImage()
+    }
+
+    @objc private func handleCopyPNG() {
         editorController?.canvasView?.finalizeActiveTool()
-        ImageExporter.export(state: state)
+        ImageExporter.copyToPasteboard(state: state, format: .png)
+    }
+
+    @objc private func handleCopyAVIF() {
+        editorController?.canvasView?.finalizeActiveTool()
+        ImageExporter.copyToPasteboard(state: state, format: .avif)
     }
 
     @objc private func handleNew() {
+        editorController?.canvasView?.finalizeActiveTool()
         if state.hasImage && !state.annotations.isEmpty {
             let alert = NSAlert()
             alert.messageText = "Spara bild?"
@@ -139,15 +157,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             alert.addButton(withTitle: "Avbryt")
             switch alert.runModal() {
             case .alertFirstButtonReturn:
-                handleSave()
-                resetEditor()
+                saveCurrentImage { [weak self] saved in
+                    guard saved else { return }
+                    self?.beginFreshCapture()
+                }
             case .alertSecondButtonReturn:
-                resetEditor()
+                beginFreshCapture()
             default:
                 break
             }
         } else {
-            resetEditor()
+            beginFreshCapture()
         }
     }
 
@@ -158,6 +178,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func resetEditor() {
         state.reset()
         editorController?.window?.orderOut(nil)
+    }
+
+    private func saveCurrentImage(completion: ((Bool) -> Void)? = nil) {
+        editorController?.canvasView?.finalizeActiveTool()
+        ImageExporter.export(state: state, completion: completion)
+    }
+
+    private func beginFreshCapture() {
+        resetEditor()
+        // Let modal alerts/save panels disappear fully before freezing the next capture.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.hotKeyFired()
+        }
     }
 }
 

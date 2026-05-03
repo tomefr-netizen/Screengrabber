@@ -23,6 +23,26 @@ struct EditorToolbarView: View {
             .frame(width: 396)
             .help("Välj verktyg")
 
+            Menu {
+                ForEach(SymbolKind.allCases, id: \.self) { kind in
+                    Button {
+                        state.selectedSymbol = kind
+                        state.activeTool = .symbol
+                    } label: {
+                        Label(kind.title, systemImage: kind.symbolName)
+                    }
+                }
+            } label: {
+                Image(systemName: state.selectedSymbol.symbolName)
+                    .frame(width: 20, height: 20)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(state.activeTool == .symbol ? Color.accentColor.opacity(0.18) : Color.clear)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            }
+            .menuStyle(.borderlessButton)
+            .help("Symboler")
+
             Divider().frame(height: 22)
 
             ColorPicker("", selection: strokeColorBinding)
@@ -76,6 +96,26 @@ struct EditorToolbarView: View {
             Slider(value: $state.lineWidth, in: 1...20, step: 0.5)
                 .frame(width: 80)
                 .help("Linjebredd: \(Int(state.lineWidth))pt")
+
+            Divider().frame(height: 22)
+
+            Text("Canvas")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Slider(value: $state.zoomScale, in: 0.25...4.0, step: 0.05)
+                .frame(width: 100)
+                .help("Canvas-zoom: \(Int(state.zoomScale * 100))%")
+
+            Text("\(Int(state.zoomScale * 100))%")
+                .font(.caption.monospacedDigit())
+                .frame(width: 42, alignment: .trailing)
+
+            Button("100%") {
+                state.zoomScale = 1.0
+            }
+            .font(.caption)
+            .help("Återställ canvas-zoom")
 
             Divider().frame(height: 22)
 

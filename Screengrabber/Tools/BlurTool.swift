@@ -18,13 +18,18 @@ class BlurTool: DrawingTool {
                              width: abs(point.x - start.x), height: abs(point.y - start.y))
     }
 
-    func mouseUp(at point: CGPoint) {
+    func mouseUp(at point: CGPoint, in view: NSView) {
         defer { startPoint = nil; currentRect = nil }
         guard let rect = currentRect, rect.width > 8, rect.height > 8 else { return }
         let kind: BlurKind = state?.blurMode == .pixelate
             ? .pixelate(scale: 16)
             : .gaussian(radius: 20)
-        state?.addAnnotation(.blur(rect, kind))
+        let annotation = Annotation.blur(rect, kind)
+        if let canvas = view as? CanvasView {
+            state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+        } else {
+            state?.addAnnotation(annotation)
+        }
     }
 
     func drawInProgress(in context: CGContext) {

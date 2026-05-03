@@ -42,14 +42,20 @@ class ShapeTool: DrawingTool {
                              width: abs(dx), height: abs(dy))
     }
 
-    func mouseUp(at point: CGPoint) {
+    func mouseUp(at point: CGPoint, in view: NSView) {
         defer { startPoint = nil; currentRect = nil; capturedFillColor = nil }
         guard let rect = currentRect, rect.width > 4, rect.height > 4 else { return }
+        let annotation: Annotation
         switch kind {
         case .rect, .highlight:
-            state?.addAnnotation(.rect(rect, strokeColor, strokeWidth, capturedFillColor))
+            annotation = .rect(rect, strokeColor, strokeWidth, capturedFillColor)
         case .ellipse:
-            state?.addAnnotation(.ellipse(rect, strokeColor, strokeWidth, capturedFillColor))
+            annotation = .ellipse(rect, strokeColor, strokeWidth, capturedFillColor)
+        }
+        if let canvas = view as? CanvasView {
+            state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+        } else {
+            state?.addAnnotation(annotation)
         }
     }
 

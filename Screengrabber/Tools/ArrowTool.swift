@@ -21,11 +21,16 @@ class ArrowTool: DrawingTool {
         endPoint = modifierFlags.contains(.shift) ? snap45(from: start, to: point) : point
     }
 
-    func mouseUp(at point: CGPoint) {
+    func mouseUp(at point: CGPoint, in view: NSView) {
         defer { startPoint = nil; endPoint = nil }
         guard let start = startPoint, let end = endPoint else { return }
         guard hypot(end.x - start.x, end.y - start.y) > 4 else { return }
-        state?.addAnnotation(.arrow(start, end, color, width))
+        let annotation = Annotation.arrow(start, end, color, width)
+        if let canvas = view as? CanvasView {
+            state?.addAnnotation(canvas.storedAnnotation(fromViewAnnotation: annotation))
+        } else {
+            state?.addAnnotation(annotation)
+        }
     }
 
     func drawInProgress(in context: CGContext) {

@@ -62,6 +62,16 @@ struct FloatingMenuView: View {
             }
             .disabled(!state.hasImage)
 
+            Menu("Kopiera") {
+                Button("PNG") {
+                    NotificationCenter.default.post(name: .copyPNGRequested, object: nil)
+                }
+                Button("AVIF") {
+                    NotificationCenter.default.post(name: .copyAVIFRequested, object: nil)
+                }
+            }
+            .disabled(!state.hasImage)
+
             Divider().frame(height: 20)
 
             Menu {
@@ -90,5 +100,7 @@ struct FloatingMenuView: View {
 extension Notification.Name {
     static let newImageRequested   = Notification.Name("newImageRequested")
     static let saveRequested       = Notification.Name("saveRequested")
+    static let copyPNGRequested    = Notification.Name("copyPNGRequested")
+    static let copyAVIFRequested   = Notification.Name("copyAVIFRequested")
     static let captureDelayChanged = Notification.Name("captureDelayChanged")
 }
